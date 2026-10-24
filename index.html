@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma Educativa | U.E. Dr. Enrique Noboa</title>
+    <style>
+        :root {
+            --primary: #0f4c81; --primary-dark: #0a365d; --secondary: #f4a261;
+            --accent: #e76f51; --bg: #f0f4f8; --card-bg: #ffffff;
+            --text-main: #2d3748; --text-light: #718096; --success: #38a169;
+            --danger: #e53e3e; --border: #e2e8f0;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg); color: var(--text-main); line-height: 1.6; min-height: 100vh; }
+        .main-header { background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%); color: white; padding: 20px 0; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100; }
+        .header-content { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .institution-info h1 { font-size: 1.4rem; margin-bottom: 2px; letter-spacing: 0.5px; }
+        .institution-info p { font-size: 0.85rem; opacity: 0.9; }
+        .timer-widget { background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 10px 20px; border-radius: 50px; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,0.2); }
+        .timer-widget.warning { background: rgba(229, 62, 62, 0.8); animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .screen { display: none; animation: fadeIn 0.5s ease-out; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card { background: var(--card-bg); border-radius: 12px; box-shadow: var(--shadow); padding: 30px; margin-bottom: 25px; border: 1px solid var(--border); }
+        .login-wrapper { display: flex; justify-content: center; align-items: center; min-height: 70vh; }
+        .login-card { width: 100%; max-width: 500px; text-align: center; }
+        .login-card h2 { color: var(--primary); margin-bottom: 5px; font-size: 1.8rem; }
+        .login-card .subtitle { color: var(--text-light); margin-bottom: 25px; }
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: var(--text-main); font-size: 0.9rem; }
+        .form-control { width: 100%; padding: 12px 15px; border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; transition: border-color 0.3s; }
+        .form-control:focus { outline: none; border-color: var(--primary); }
+        .btn { display: inline-block; padding: 12px 28px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-decoration: none; text-align: center; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { background: #2f855a; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { background: #c53030; }
+        .btn-email { background: #ea4335; color: white; }
+        .btn-email:hover { background: #c5221f; }
+        .class-nav { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px; }
+        .nav-btn { padding: 10px 20px; background: white; border: 2px solid var(--border); border-radius: 50px; cursor: pointer; font-weight: 600; white-space: nowrap; transition: all 0.3s; }
+        .nav-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .topic-content { display: none; }
+        .topic-content.active { display: block; animation: fadeIn 0.4s; }
+        .topic-content h3 { color: var(--primary); border-left: 4px solid var(--secondary); padding-left: 12px; margin-bottom: 15px; font-size: 1.4rem; }
+        .topic-content h4 { color: var(--text-main); margin: 20px 0 10px; font-size: 1.1rem; }
+        .topic-content p, .topic-content li { margin-bottom: 10px; text-align: justify; }
+        .topic-content ul { padding-left: 20px; }
+        .math-block { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin: 15px 0; font-family: 'Cambria Math', 'Times New Roman', serif; font-size: 1.1rem; text-align: center; color: var(--primary-dark); overflow-x: auto; }
+        .highlight-box { background: linear-gradient(135deg, #ebf8ff 0%, #e6fffa 100%); border-left: 5px solid var(--primary); padding: 15px 20px; border-radius: 0 8px 8px 0; margin: 20px 0; }
+        .canvas-container { background: #fcfcfc; border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin: 20px 0; text-align: center; }
+        canvas { max-width: 100%; height: auto; border-radius: 4px; }
+        .canvas-legend { display: flex; justify-content: center; gap: 20px; margin-top: 10px; font-size: 0.9rem; color: var(--text-light); }
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 5px; vertical-align: middle; }
+        .progress-bar-container { background: var(--border); height: 8px; border-radius: 4px; margin-bottom: 25px; overflow: hidden; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 0%; transition: width 0.5s ease; border-radius: 4px; }
+        .question-card { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; transition: all 0.3s; }
+        .question-card:hover { box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .question-card h4 { color: var(--primary); margin-bottom: 15px; font-size: 1.05rem; line-height: 1.5; }
+        .options-grid { display: flex; flex-direction: column; gap: 10px; }
+        .option-label { display: flex; align-items: center; padding: 12px 15px; background: #f7fafc; border: 2px solid transparent; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .option-label:hover { background: #edf2f7; border-color: var(--primary); }
+        .option-label input { margin-right: 12px; accent-color: var(--primary); transform: scale(1.2); }
+        .option-label.correct { background: #c6f6d5; border-color: var(--success); }
+        .option-label.incorrect { background: #fed7d7; border-color: var(--danger); }
+        .result-header { text-align: center; margin-bottom: 30px; }
+        .result-header .grade-circle { width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; color: white; margin: 0 auto 15px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+        .grade-pass { background: linear-gradient(135deg, #48bb78, #38a169); }
+        .grade-fail { background: linear-gradient(135deg, #f56565, #e53e3e); }
+        .receipt { background: #f8f9fa; border: 2px dashed var(--border); padding: 25px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 0.9rem; line-height: 1.8; white-space: pre-wrap; color: var(--text-main); }
+        .homework-section { background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%); border: 2px solid var(--accent); border-radius: 12px; padding: 25px; margin: 20px 0; }
+        .homework-section h4 { color: var(--accent); margin-bottom: 15px; font-size: 1.2rem; }
+        .homework-item { background: white; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid var(--secondary); }
+        @media print { body { background: white; } .main-header, .no-print, .class-nav, .btn { display: none !important; } .card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; } .screen { display: block !important; } #screen-class, #screen-exam { display: none !important; } }
+        @media (max-width: 768px) { .header-content { flex-direction: column; gap: 15px; text-align: center; } .card { padding: 20px; } }
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="header-content">
+            <div class="institution-info">
+                <h1>UNIDAD EDUCATIVA DR. ENRIQUE NOBOA</h1>
+                <p>Especialidades: Informática | Contabilidad &nbsp;•&nbsp; Paralelos: A, B, C</p>
+                <p><strong>Docente:</strong> Msc. EDWIN LLIGUIPUMA E.</p>
+            </div>
+            <div class="timer-widget no-print" id="timerWidget" style="display: none;">
+                <span>⏱️</span> <span id="timerText">40:00</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="screen-login" class="screen active">
+            <div class="login-wrapper">
+                <div class="card login-card">
+                    <h2>Bienvenido al Simulador</h2>
+                    <p class="subtitle">Matemática - 2do BGU | Funciones Trigonométricas</p>
+                    <div id="attemptWarning" style="display:none; background:#fed7d7; color:#c53030; padding:15px; border-radius:8px; margin-bottom:20px; font-weight:bold;"></div>
+                    <p style="margin-bottom: 25px; font-size: 0.9rem; color: var(--text-light);">
+                        Esta plataforma incluye una clase didáctica, tareas para casa y una evaluación de 10 reactivos.
+                        Dispone de <strong>40 minutos</strong>. Máximo permitido: <strong>2 intentos</strong>.
+                    </p>
+                    <div class="form-group">
+                        <label>Nombres y Apellidos Completos</label>
+                        <input type="text" id="inputName" class="form-control" placeholder="Ej: Juan Pérez García" required>
+                    </div>
+                    <div style="display: flex; gap: 15px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Especialidad</label>
+                            <select id="inputSpec" class="form-control">
+                                <option value="Informática">Informática</option>
+                                <option value="Contabilidad">Contabilidad</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Paralelo</label>
+                            <select id="inputParallel" class="form-control">
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="startPlatform()">
+                        Iniciar Clase y Evaluación
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="screen-class" class="screen">
+            <div class="card">
+                <h2 style="color: var(--primary); margin-bottom: 5px;">Módulo de Aprendizaje</h2>
+                <p style="color: var(--text-light); margin-bottom: 20px;">Explore los temas con atención. Los gráficos son generados dinámicamente.</p>
+                <div class="class-nav no-print">
+                    <button class="nav-btn active" onclick="showTopic(0, this)">1. Fenómenos</button>
+                    <button class="nav-btn" onclick="showTopic(1, this)">2. Periodicidad</button>
+                    <button class="nav-btn" onclick="showTopic(2, this)">3. Seno y Coseno</button>
+                    <button class="nav-btn" onclick="showTopic(3, this)">4. Transformaciones</button>
+                    <button class="nav-btn" onclick="showTopic(4, this)">5. Aplicaciones</button>
+                    <button class="nav-btn" onclick="showTopic(5, this)">6. Tarea</button>
+                </div>
+
+                <div class="topic-content active" id="topic-0">
+                    <h3>1. Matemática y Fenómenos Periódicos</h3>
+                    <p>Las funciones trigonométricas constituyen la herramienta matemática más adecuada para describir <strong>fenómenos periódicos</strong>. Un fenómeno es periódico cuando se repite a intervalos regulares de tiempo o de espacio.</p>
+                    <div class="highlight-box"><strong>Ejemplos:</strong> El latido cardiaco, el movimiento de los planetas, la variación de presión que produce el sonido, el movimiento del péndulo, la vibración de un puente, la corriente eléctrica alterna y ciclos biológicos.</div>
+                    <p>Para modelar estos fenómenos, se requiere que los dominios de estas funciones sean conjuntos de <strong>números reales (ℝ)</strong>.</p>
+                </div>
+
+                <div class="topic-content" id="topic-1">
+                    <h3>2. Funciones Periódicas</h3>
+                    <p><strong>Definición:</strong> Sean T > 0 y f una función real definida en ℝ. Se dice que f es periódica de periodo 2T si y solo si verifica:</p>
+                    <div class="math-block">f(x + 2T) = f(x), &nbsp; para todo x ∈ ℝ</div>
+                    <div class="canvas-container"><canvas id="canvasPeriodic" width="800" height="250"></canvas></div>
+                </div>
+
+                <div class="topic-content" id="topic-2">
+                    <h3>3. Funciones Seno y Coseno</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <h4>Función Seno: y = sen(x)</h4>
+                            <ul><li><strong>Dominio:</strong> ℝ</li><li><strong>Recorrido:</strong> [-1, 1]</li><li><strong>Periodo:</strong> 2π</li><li><strong>Paridad:</strong> Impar (sen(-x) = -sen(x))</li><li><strong>Cortes eje X:</strong> x = nπ</li><li><strong>Amplitud:</strong> 1</li></ul>
+                        </div>
+                        <div>
+                            <h4>Función Coseno: y = cos(x)</h4>
+                            <ul><li><strong>Dominio:</strong> ℝ</li><li><strong>Recorrido:</strong> [-1, 1]</li><li><strong>Periodo:</strong> 2π</li><li><strong>Paridad:</strong> Par (cos(-x) = cos(x))</li><li><strong>Cortes eje X:</strong> x = π/2 + nπ</li><li><strong>Amplitud:</strong> 1</li></ul>
+                        </div>
+                    </div>
+                    <div class="canvas-container"><canvas id="canvasSinCos" width="800" height="300"></canvas></div>
+                </div>
+
+                <div class="topic-content" id="topic-3">
+                    <h3>4. Transformaciones de Gráficas</h3>
+                    <p>Para y = A·sen(Bx + C) + D o y = A·cos(Bx + C) + D:</p>
+                    <ul>
+                        <li><strong>Amplitud (|A|):</strong> Promedio entre max y min. Si |A|>1 dilata; si |A|<1 contrae.</li>
+                        <li><strong>Periodo (T):</strong> T = 2π / B.</li>
+                        <li><strong>Frecuencia:</strong> Determinada por B.</li>
+                        <li><strong>Desplazamiento Vertical (D):</strong> Sube si D>0, baja si D<0.</li>
+                        <li><strong>Desfase (-C/B):</strong> Desplazamiento horizontal.</li>
+                    </ul>
+                    <h4>Ejercicio Resuelto: f(x) = -3·sen(2x - π/3)</h4>
+                    <div class="math-block">Amplitud = 3 | Periodo = π | Desfase = π/6 (derecha)</div>
+                    <div class="canvas-container"><canvas id="canvasTransform" width="800" height="300"></canvas></div>
+                </div>
+
+                <div class="topic-content" id="topic-4">
+                    <h3>5. Interdisciplinariedad y Aplicaciones</h3>
+                    <div class="highlight-box"><strong>🏥 Salud:</strong> Muy utilizadas en la lectura de <strong>electrocardiogramas</strong>.</div>
+                    <ul><li><strong>Física:</strong> Mecánica, óptica, vibraciones, ondas.</li><li><strong>Informática:</strong> Juegos, Series de Fourier, procesamiento de imágenes.</li><li><strong>Música:</strong> Análisis de frecuencias.</li></ul>
+                </div>
+
+                <div class="topic-content" id="topic-5">
+                    <h3>6. Tarea para Casa</h3>
+                    <div class="homework-section">
+                        <h4>📝 Ejercicio 1: Completar Tablas</h4>
+                        <div class="homework-item"><p><strong>Función:</strong> f(x) = sen(2x). Complete la tabla para x = 0, π/4, π/2, 3π/4, π y grafique.</p></div>
+                        <div class="homework-item"><p><strong>Función:</strong> f(x) = 2·sen(x/3). Calcule Amplitud, Periodo y Desfase.</p></div>
+                    </div>
+                    <div class="homework-section">
+                        <h4>📊 Ejercicio 2: Análisis</h4>
+                        <div class="homework-item"><p>Determine amplitud, periodo, frecuencia, desplazamiento vertical y desfase de: 1) f(x) = cos(2x) + 1, 2) f(x) = 3·cos(x/2), 3) f(x) = 2·sen(x - 2) + 1, 4) f(x) = sen(3x + 3).</p></div>
+                    </div>
+                    <div class="homework-section">
+                        <h4>🎯 Ejercicio 3: Graficación</h4>
+                        <div class="homework-item"><p>Grafique: 1) f(x) = cos(4x), 2) f(x) = -cos(x), 3) h(x) = sen(x), 4) f(x) = 2·sen(x/2) - 1.</p></div>
+                    </div>
+                    <div class="homework-section">
+                        <h4>🔍 Ejercicio 4: Ecuaciones</h4>
+                        <div class="homework-item"><p>Determine el subconjunto de ℝ: 1) {x ∈ ℝ | sen(x) = 0}, 2) {x ∈ ℝ | sen(x) = 1}, 3) {x ∈ ℝ | cos(x) = 0}.</p></div>
+                    </div>
+                    <div class="homework-section">
+                        <h4>⚙️ Ejercicio 5: Aplicación</h4>
+                        <div class="homework-item"><p>Un péndulo se describe con h(t) = 3·sen(2t + π/4) + 5. Halle amplitud, periodo, altura máxima, mínima y grafique.</p></div>
+                    </div>
+                    <div class="highlight-box"><strong>📌 Indicaciones:</strong> Realice en su cuaderno, muestre procedimientos, use regla. Fecha: Próxima clase. Valor: 2 puntos.</div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;" class="no-print">
+                    <button class="btn btn-success" onclick="startExam()">He estudiado el material. Iniciar Evaluación</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="screen-exam" class="screen">
+            <div class="card">
+                <h2 style="color: var(--primary); margin-bottom: 5px;">Evaluación Formativa</h2>
+                <p style="color: var(--text-light); margin-bottom: 20px;">Responda las 10 preguntas. Al finalizar, su nota se enviará automáticamente al correo del docente.</p>
+                <div class="progress-bar-container no-print"><div class="progress-bar" id="progressBar"></div></div>
+                <form id="examForm"><div id="questionsContainer"></div>
+                    <div style="text-align: center; margin-top: 30px;" class="no-print">
+                        <button type="button" class="btn btn-danger" onclick="submitExam()">Finalizar y Calificar</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section id="screen-results" class="screen">
+            <div class="card">
+                <div class="result-header">
+                    <div class="grade-circle" id="gradeCircle">0</div>
+                    <h2 id="resultMessage">Evaluación Finalizada</h2>
+                    <p id="syncStatus" style="margin-top:10px; color:var(--text-light); font-size:0.9rem;"></p>
+                </div>
+                <div class="receipt" id="receiptContent"></div>
+                <div style="text-align: center; margin-top: 30px;" class="no-print">
+                    <button class="btn btn-primary" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+                    <button class="btn btn-email" onclick="sendEmail()">📧 Enviar Nota al Docente</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const TEACHER_EMAIL = 'edote2768@gmail.com';
+        const MAX_ATTEMPTS = 2;
+
+        let studentData = {};
+        let timeLeft = 40 * 60;
+        let timerInterval;
+        let startTime;
+        let currentAttempt = 1;
+        let finalScore = 0;
+        let finalGrade = 0;
+        let endTime;
+
+        function drawGraph(canvasId, functions, options = {}) {
+            const canvas = document.getElementById(canvasId);
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width, height = canvas.height;
+            const centerX = width / 2, centerY = height / 2;
+            const xRange = options.xRange || 4 * Math.PI, yRange = options.yRange || 4;
+            const scaleX = width / xRange, scaleY = height / yRange;
+
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, width, height);
+            ctx.strokeStyle = "#edf2f7"; ctx.lineWidth = 1;
+            for(let i = -10; i <= 10; i++) { let x = centerX + (i * Math.PI / 2) * scaleX; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke(); }
+            for(let i = -5; i <= 5; i++) { let y = centerY - i * scaleY; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke(); }
+            ctx.strokeStyle = "#a0aec0"; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(0, centerY); ctx.lineTo(width, centerY); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(centerX, 0); ctx.lineTo(centerX, height); ctx.stroke();
+            ctx.fillStyle = "#718096"; ctx.font = "12px sans-serif";
+            ctx.fillText("X", width - 15, centerY - 10); ctx.fillText("Y", centerX + 10, 15); ctx.fillText("0", centerX + 5, centerY + 15);
+
+            functions.forEach(func => {
+                ctx.strokeStyle = func.color; ctx.lineWidth = func.width || 2.5; ctx.beginPath();
+                let first = true;
+                for (let px = 0; px < width; px++) {
+                    let mathX = (px - centerX) / scaleX, mathY = func.fn(mathX), py = centerY - mathY * scaleY;
+                    if (py < -100 || py > height + 100) { first = true; continue; }
+                    if (first) { ctx.moveTo(px, py); first = false; } else { ctx.lineTo(px, py); }
+                }
+                ctx.stroke();
+            });
+        }
+
+        function initGraphs() {
+            drawGraph('canvasPeriodic', [{ fn: x => Math.sin(x), color: '#0f4c81', width: 3 }], { xRange: 8 * Math.PI, yRange: 3 });
+            drawGraph('canvasSinCos', [{ fn: x => Math.sin(x), color: '#e53e3e', width: 3 }, { fn: x => Math.cos(x), color: '#2b6cb0', width: 3 }], { xRange: 4 * Math.PI, yRange: 3 });
+            drawGraph('canvasTransform', [{ fn: x => Math.sin(x), color: '#cbd5e0', width: 2 }, { fn: x => -3 * Math.sin(2 * x - Math.PI / 3), color: '#e76f51', width: 3 }], { xRange: 4 * Math.PI, yRange: 8 });
+        }
+
+        function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0, 0); }
+        function showTopic(index, btn) { document.querySelectorAll('.topic-content').forEach(t => t.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById('topic-' + index).classList.add('active'); btn.classList.add('active'); }
+
+        function startPlatform() {
+            const name = document.getElementById('inputName').value.trim();
+            if (!name) { alert("Por favor, ingrese su nombre completo."); return; }
+
+            const storageKey = 'noboa_trig_attempts_' + name.toLowerCase().replace(/\s+/g, '');
+            let attempts = parseInt(localStorage.getItem(storageKey) || '0');
+            
+            if (attempts >= MAX_ATTEMPTS) {
+                document.getElementById('attemptWarning').style.display = 'block';
+                document.getElementById('attemptWarning').innerText = `⚠️ ACCESO DENEGADO: El estudiante ${name} ya ha realizado el máximo de ${MAX_ATTEMPTS} intentos permitidos.`;
+                return;
+            }
+            currentAttempt = attempts + 1;
+
+            studentData = { name: name, spec: document.getElementById('inputSpec').value, parallel: document.getElementById('inputParallel').value, startTime: new Date() };
+            startTime = studentData.startTime;
+
+            showScreen('screen-class');
+            document.getElementById('timerWidget').style.display = 'flex';
+            initGraphs();
+            startTimer();
+        }
+
+        function startTimer() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--; updateTimerDisplay();
+                if (timeLeft <= 300) document.getElementById('timerWidget').classList.add('warning');
+                if (timeLeft <= 0) { clearInterval(timerInterval); alert("¡Tiempo terminado!"); submitExam(); }
+            }, 1000);
+        }
+        function updateTimerDisplay() { const m = Math.floor(timeLeft / 60), s = timeLeft % 60; document.getElementById('timerText').innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`; }
+
+        const questions = [
+            { q: "1. Dada la función f(x) = sen(2x), ¿cuál es su amplitud y su periodo?", opts: ["Amplitud = 1, Periodo = π", "Amplitud = 2, Periodo = 2π", "Amplitud = 1, Periodo = 2π", "Amplitud = 2, Periodo = π"], ans: 0 },
+            { q: "2. Para la función f(x) = 2·sen(x/3), ¿cuál es su amplitud y su periodo?", opts: ["Amplitud = 2, Periodo = 3π", "Amplitud = 2, Periodo = 6π", "Amplitud = 1/3, Periodo = 6π", "Amplitud = 2, Periodo = 2π/3"], ans: 1 },
+            { q: "3. Para la función f(x) = cos(2x) + 1, ¿cuál es su desplazamiento vertical y su recorrido?", opts: ["Desplazamiento = 1 hacia abajo, Recorrido = [-2, 0]", "Desplazamiento = 1 hacia arriba, Recorrido = [0, 2]", "Desplazamiento = 2 hacia arriba, Recorrido = [-1, 3]", "Desplazamiento = 1 hacia arriba, Recorrido = [-1, 1]"], ans: 1 },
+            { q: "4. Para la función f(x) = 3·cos(x/2), ¿cuál es su amplitud y su periodo?", opts: ["Amplitud = 3, Periodo = π", "Amplitud = 1/2, Periodo = 4π", "Amplitud = 3, Periodo = 4π", "Amplitud = 3, Periodo = 2π"], ans: 2 },
+            { q: "5. Dada la función y = 2·sen(x - 2) + 1, ¿cuál es su amplitud y su desplazamiento vertical?", opts: ["Amplitud = 1, Desplazamiento vertical = 2", "Amplitud = 2, Desplazamiento vertical = 1 hacia arriba", "Amplitud = 2, Desplazamiento vertical = 1 hacia abajo", "Amplitud = 1, Desplazamiento vertical = 1 hacia arriba"], ans: 1 },
+            { q: "6. Para la función y = sen(3x + 3), ¿cuál es su periodo y hacia dónde se desplaza horizontalmente?", opts: ["Periodo = 2π/3, se desplaza 1 unidad a la izquierda", "Periodo = 3π, se desplaza 1 unidad a la derecha", "Periodo = 2π/3, se desplaza 1 unidad a la derecha", "Periodo = 2π, se desplaza 3 unidades a la izquierda"], ans: 0 },
+            { q: "7. (Verdadero/Falso) El periodo se relaciona con las veces que se repite el ciclo y se determina por el valor de B.", opts: ["Verdadero", "Falso, se determina por el valor de A", "Falso, se determina por el valor de D", "Falso, se determina por el valor de C"], ans: 0 },
+            { q: "8. (Verdadero/Falso) La amplitud es el promedio entre los valores máximo y mínimo de la función.", opts: ["Verdadero", "Falso, es la diferencia entre máximo y mínimo", "Falso, es el valor máximo absoluto", "Falso, es el valor de B"], ans: 0 },
+            { q: "9. Para la función f(x) = cos(4x), ¿cuál es su amplitud, periodo y frecuencia?", opts: ["Amplitud = 1, Periodo = π/2, Frecuencia = 4", "Amplitud = 4, Periodo = 2π, Frecuencia = 1/4", "Amplitud = 1, Periodo = 2π, Frecuencia = 4", "Amplitud = 1, Periodo = π/4, Frecuencia = 2"], ans: 0 },
+            { q: "10. ¿Cuál es el subconjunto de ℝ definido por {x ∈ ℝ | sen(x) = 0}?", opts: ["x = π/2 + nπ, para todo entero n", "x = nπ, para todo entero n", "x = 2nπ, para todo entero n", "x = nπ/2, para todo entero n"], ans: 1 }
+        ];
+
+        function startExam() { showScreen('screen-exam'); renderQuestions(); }
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer'); container.innerHTML = '';
+            questions.forEach((q, index) => {
+                let optsHtml = '';
+                q.opts.forEach((opt, optIndex) => { optsHtml += `<label class="option-label" id="opt-${index}-${optIndex}"><input type="radio" name="q${index}" value="${optIndex}" onchange="updateProgress()"> <span>${opt}</span></label>`; });
+                container.innerHTML += `<div class="question-card"><h4>${q.q}</h4><div class="options-grid">${optsHtml}</div></div>`;
+            });
+        }
+        function updateProgress() {
+            let answered = 0;
+            questions.forEach((q, index) => { if (document.querySelector(`input[name="q${index}"]:checked`)) answered++; });
+            document.getElementById('progressBar').style.width = ((answered / questions.length) * 100) + '%';
+        }
+
+        function submitExam() {
+            clearInterval(timerInterval);
+            let score = 0;
+            questions.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                const correctIdx = q.ans;
+                document.getElementById(`opt-${index}-${correctIdx}`).classList.add('correct');
+                if (selected) {
+                    if (parseInt(selected.value) === correctIdx) score++;
+                    else document.getElementById(`opt-${index}-${selected.value}`).classList.add('incorrect');
+                }
+            });
+
+            finalScore = score;
+            finalGrade = (score / questions.length) * 10;
+            endTime = new Date();
+            
+            const storageKey = 'noboa_trig_attempts_' + studentData.name.toLowerCase().replace(/\s+/g, '');
+            localStorage.setItem(storageKey, currentAttempt);
+
+            showResults();
+        }
+
+        function showResults() {
+            showScreen('screen-results');
+            document.getElementById('timerWidget').style.display = 'none';
+            const circle = document.getElementById('gradeCircle');
+            circle.innerText = finalGrade.toFixed(1);
+            circle.className = 'grade-circle ' + (finalGrade >= 7 ? 'grade-pass' : 'grade-fail');
+            document.getElementById('resultMessage').innerText = finalGrade >= 7 ? '¡Excelente trabajo! Has aprobado.' : 'Sigue estudiando, puedes mejorar.';
+            document.getElementById('syncStatus').innerText = 'Haga clic en "Enviar Nota al Docente" para enviar su calificación.';
+
+            const startStr = startTime.toLocaleString('es-EC', { dateStyle: 'full', timeStyle: 'medium' });
+            const endStr = endTime.toLocaleString('es-EC', { dateStyle: 'full', timeStyle: 'medium' });
+
+            const receipt = `=========================================================
+       UNIDAD EDUCATIVA DR. ENRIQUE NOBOA
+       Especialidad: ${studentData.spec} | Paralelo: ${studentData.parallel}
+=========================================================
+ESTUDIANTE : ${studentData.name}
+ASIGNATURA : Matemática (2do BGU)
+TEMA       : Funciones Trigonométricas
+DOCENTE    : Msc. EDWIN LLIGUIPUMA E.
+---------------------------------------------------------
+INICIO     : ${startStr}
+FIN        : ${endStr}
+INTENTO Nº : ${currentAttempt} de ${MAX_ATTEMPTS}
+---------------------------------------------------------
+RESULTADOS DE LA EVALUACIÓN:
+Aciertos   : ${finalScore} / ${questions.length}
+CALIFICACIÓN FINAL: ${finalGrade.toFixed(2)} / 10
+=========================================================`;
+            document.getElementById('receiptContent').innerText = receipt;
+        }
+
+        function sendEmail() {
+            const subject = encodeURIComponent(`Calificación Matemática 2do BGU - ${studentData.name} - Paralelo ${studentData.parallel}`);
+            
+            const body = encodeURIComponent(
+`UNIDAD EDUCATIVA DR. ENRIQUE NOBOA
+Especialidad: ${studentData.spec} | Paralelo: ${studentData.parallel}
+=========================================================
+ESTUDIANTE: ${studentData.name}
+ASIGNATURA: Matemática (2do BGU)
+TEMA: Funciones Trigonométricas
+DOCENTE: Msc. EDWIN LLIGUIPUMA E.
+---------------------------------------------------------
+FECHA INICIO: ${startTime.toLocaleString('es-EC', { dateStyle: 'full', timeStyle: 'medium' })}
+FECHA FIN: ${endTime.toLocaleString('es-EC', { dateStyle: 'full', timeStyle: 'medium' })}
+INTENTO: ${currentAttempt} de ${MAX_ATTEMPTS}
+---------------------------------------------------------
+RESULTADOS:
+Aciertos: ${finalScore} / ${questions.length}
+CALIFICACIÓN FINAL: ${finalGrade.toFixed(2)} / 10
+=========================================================`
+            );
+            
+            window.location.href = `mailto:${TEACHER_EMAIL}?subject=${subject}&body=${body}`;
+            
+            document.getElementById('syncStatus').innerText = '✅ Se abrió su cliente de correo. Complete el envío haciendo clic en "Enviar".';
+            document.getElementById('syncStatus').style.color = 'var(--success)';
+        }
+    </script>
+</body>
+</html>
